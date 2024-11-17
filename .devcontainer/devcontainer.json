@@ -11,7 +11,12 @@
 		"vscode": {
 			"settings": {
 				"python.defaultInterpreterPath": "/usr/local/bin/python"
-			}
+			},
+			"extensions": [
+				"ms-python.debugpy",
+				"ms-python.python",
+				"ms-python.vscode-pylance"
+			]
 		}
 	},
 	"postStartCommand": "git config --global --add safe.directory ${containerWorkspaceFolder}"

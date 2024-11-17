@@ -12,7 +12,6 @@
             "program": "${workspaceFolder}/Payload_Type/ssh_agent/main.py",
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}/Payload_Type/ssh_agent",
-            "consoleTitle": "SSH_Agent"
         }
     ]
 }

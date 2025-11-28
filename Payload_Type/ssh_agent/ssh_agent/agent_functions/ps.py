@@ -1,8 +1,6 @@
 from mythic_container.MythicCommandBase import *
 from mythic_container.MythicRPC import *
-
-import paramiko
-
+import subprocess
 
 class PsArguments(TaskArguments):
     def __init__(self, command_line, **kwargs):
@@ -24,18 +22,27 @@ class PsCommand(CommandBase):
     attackmapping = []
 
     async def create_go_tasking(self, taskData: MythicCommandBase.PTTaskMessageAllData) -> MythicCommandBase.PTTaskCreateTaskingMessageResponse:
-        # TODO: abstract this away in a helper library / folder, don't repeat this in each 'task'
-        ssh = paramiko.SSHClient()
-        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        ssh.connect('10.0.0.21', username='ubuntu', password='ubuntu')
-        stdin, stdout, stderr = ssh.exec_command('ps -ef')
-        output = stdout.read().decode('utf-8')
-        errors = stderr.read().decode('utf-8')
-        ssh.close()
-        
+        socket_path = ["-S", "/tmp/ssh_socket"]
+        default_options = ["-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=no", "-o", "UserKnownHostsFile=/dev/null", "-T"]
+        command_to_execute = ["ps", "-efH"]
+
+        try:
+            proc = subprocess.run([
+                "ssh",
+                *socket_path,
+                *default_options,
+                "dummyhost_required_for_ssh_syntax",
+                *command_to_execute
+            ], capture_output=True, text=True, timeout=30)
+            output = proc.stdout
+            errors = proc.stderr
+        except Exception as e:
+            output = ""
+            errors = str(e)
+
         await SendMythicRPCResponseCreate(MythicRPCResponseCreateMessage(
             TaskID=taskData.Task.ID,
-            Response=output.encode("UTF8"),
+            Response=(output or "").encode("UTF8"),
         ))
 
         response = MythicCommandBase.PTTaskCreateTaskingMessageResponse(

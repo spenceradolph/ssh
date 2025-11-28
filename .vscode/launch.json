@@ -5,13 +5,12 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "SSH_Agent",
+            "name": "SSH Agent Debug",
             "type": "debugpy",
-            "python": "/usr/local/bin/python",
             "request": "launch",
-            "program": "${workspaceFolder}/Payload_Type/ssh_agent/main.py",
-            "console": "integratedTerminal",
             "cwd": "${workspaceFolder}/Payload_Type/ssh_agent",
+            "program": "${workspaceFolder}/Payload_Type/ssh_agent/main.py",
+            "console": "integratedTerminal"
         }
     ]
 }

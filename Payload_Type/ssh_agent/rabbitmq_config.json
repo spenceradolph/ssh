@@ -1,6 +1,6 @@
 {
-    "rabbitmq_host": "10.0.0.21",
-    "rabbitmq_password": "p5vjKjaDPM8EOMBJjUccrlqyMcP5AP",
-    "mythic_server_host": "10.0.0.21",
+    "rabbitmq_host": "10.0.1.222",
+    "rabbitmq_password": "rabbitmqpassword",
+    "mythic_server_host": "10.0.1.222",
     "debug_level": "debug"
 }

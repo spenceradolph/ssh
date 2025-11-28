@@ -19,9 +19,12 @@ class SSH(PayloadType):
     agent_path = pathlib.Path(".") / "ssh_agent"
     agent_icon_path = agent_path / "agent_functions" / "ssh.svg"
     agent_code_path = agent_path / "agent_code"
-    build_parameters = []
-    c2_profiles = []
+    c2_profiles = ["ssh"]
+    build_parameters = [
+        # TODO: build parameters (key, user, host, port)
+    ]
 
     async def build(self) -> BuildResponse:
+        # TODO: generate an ssh key and track it to use later when connecting
         resp = BuildResponse(status=BuildStatus.Success)
         return resp

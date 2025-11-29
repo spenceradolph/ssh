@@ -1,22 +1,37 @@
 # SSH
 
-An ssh agent for Mythic.
+An ssh agent for Mythic. 
 
-### Current How-To
+## Why
+Instead of running malware, just add a key 🤷‍♂️.
 
-- manually build an ssh_agent payload
-- manually create an ssh_agent callback
-    - TODO: specify host, user, pass in this part?
-- task normally, each task will connect, run command, then show the output
+## Current How-To
 
-### TODO: figure out how to best implement
+- Payloads are just ssh private keys
+    - These are tied to a username, host, port (actual host:port, not a tunnel)
 
-- when building a payload, should there be 1 payload for all ssh 'callbacks' that exist?
-- is it useful to 'build' this part of the 'agent' prior to connecting / setting up
-    - can generate ssh keys / passwords / usernames here
-    - instructions for how to install
-- with callbacks, technically the thing that is unique among all of them will be the ip to connect to
-    - 1 payload (with 1 key), could be used on multiple computers
-    - 1 user/pass could be installed on multiple computers
-    - doesn't make sense to have more than 1 callback for the same server
+- Generating a payload will output the public key in the build message
+
+- Manually create a callback to establish the ssh connection
+    - If using a tunnel, you must specify within 'ExtraInfo' the tunnel using format `host:port`
+    - 'reconnect' will connect in this same way
+
+## Current Supported Commands
+
+- ps
+- exit
+- reconnect
+
+## TODO
+
+- optionally upload private keys as part of build
+- optionally select previously built private keys?
+- more error handling
+
+### Integrations TODO
+
+- process tree
+- file browser
+- interactive shell
+
 

@@ -75,10 +75,15 @@ class SSH(PayloadType):
     
     async def on_new_callback(self, newCallback: PTOnNewCallbackAllData) -> PTOnNewCallbackResponse:
         # create the ssh connection in the background
-        connect_ip, connect_port = newCallback.Callback.ExtraInfo.split(":")
-        username = newCallback.BuildParameters[0].Value
         payload_uuid = newCallback.Payload.UUID
+        username = self.get_parameter('username')
+        connect_ip = self.get_parameter('host')
+        connect_port = self.get_parameter('port')
 
+        # if using tunnel
+        if newCallback.Callback.ExtraInfo != "":
+            connect_ip, connect_port = newCallback.Callback.ExtraInfo.split(":")
+            
         output, errors = await connect_to_ssh(payload_uuid, username, connect_ip, connect_port)
 
         return PTOnNewCallbackResponse(AgentCallbackID=newCallback.Callback.AgentCallbackID, Success=True)

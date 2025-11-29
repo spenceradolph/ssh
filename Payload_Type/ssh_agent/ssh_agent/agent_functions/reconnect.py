@@ -23,8 +23,17 @@ class ReconnectCommand(CommandBase):
 
     async def create_go_tasking(self, taskData: MythicCommandBase.PTTaskMessageAllData) -> MythicCommandBase.PTTaskCreateTaskingMessageResponse:
         payload_uuid = taskData.Payload.UUID
-        username = taskData.BuildParameters[0].Value
-        connect_ip, connect_port = taskData.Callback.ExtraInfo.split(":")
+
+        for buildParam in taskData.BuildParameters:
+            if buildParam.Name == "username":
+                username = buildParam.Value
+            elif buildParam.Name == "host":
+                connect_ip = buildParam.Value
+            elif buildParam.Name == "port":
+                connect_port = buildParam.Value
+        
+        if taskData.Callback.ExtraInfo != "":
+            connect_ip, connect_port = taskData.Callback.ExtraInfo.split(":")
 
         output, errors = await connect_to_ssh(payload_uuid, username, connect_ip, connect_port)
 

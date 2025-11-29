@@ -1,5 +1,7 @@
 from mythic_container.MythicCommandBase import *
 from mythic_container.MythicRPC import *
+from datetime import datetime
+import pytz
 from ..agent_code.ssh_helpers import run_ssh_command
 
 class PsArguments(TaskArguments):
@@ -20,10 +22,43 @@ class PsCommand(CommandBase):
     author = "Spencer Adolph"
     argument_class = PsArguments
     attackmapping = []
+    supported_ui_features = ["process_browser:list"]
 
     async def create_go_tasking(self, taskData: MythicCommandBase.PTTaskMessageAllData) -> MythicCommandBase.PTTaskCreateTaskingMessageResponse:
-        command_to_execute = ["ps", "-efH"]
+        # cmd is at the end because it can contain spaces, so we join everything after the other fields to capture it
+        command_to_execute = ["ps", "--no-headers", "-ww", "-eo", "pid,ppid,user,comm,lstart,cmd"]
         output, errors = run_ssh_command(taskData, command_to_execute)
+
+        processes = []
+        for process in output.splitlines():
+            process_info = process.split()
+            pid = process_info[0]
+            ppid = process_info[1]
+            user = process_info[2]
+            comm = process_info[3]
+            lstart = " ".join(process_info[4:9])
+            cmd = " ".join(process_info[9:])
+
+            start_time = datetime.strptime(lstart, "%a %b %d %H:%M:%S %Y").replace(tzinfo=pytz.utc)
+            epoch_time = int(start_time.timestamp())
+
+            processes.append(
+                MythicRPCProcessCreateData(
+                    Host=taskData.Callback.Host,
+                    ProcessID=int(pid),
+                    ParentProcessID=int(ppid),
+                    Name=comm,
+                    User=user,
+                    CommandLine=cmd,
+                    StartTime=epoch_time * 1000, # in milliseconds
+                    # UpdateDeleted=False
+                )
+            )
+        
+        await SendMythicRPCProcessCreate(MythicRPCProcessesCreateMessage(
+            TaskID=taskData.Task.ID,
+            Processes=processes,
+        ))
 
         await SendMythicRPCResponseCreate(MythicRPCResponseCreateMessage(
             TaskID=taskData.Task.ID,

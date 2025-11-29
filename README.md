@@ -48,8 +48,13 @@ ssh -S /tmp/ssh_{PayloadUUID}.socket -O exit {host}
 
 ### Integrations TODO
 
-- process tree
 - file browser
 - interactive shell
 - socks proxy
 
+### Things to request from Cody
+
+- sort process browser by start time (and/or filter by it?)
+- last column in process should stick to right edge?
+- figure out deleted process updates to tree
+- does file browser support metadata about '/'

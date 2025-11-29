@@ -1,8 +1,8 @@
 from mythic_container.MythicCommandBase import *
 from mythic_container.MythicRPC import *
-from ..agent_code.ssh_helpers import run_ssh_command
+from ..agent_code.ssh_helpers import exit_ssh
 
-class PsArguments(TaskArguments):
+class ExitArguments(TaskArguments):
     def __init__(self, command_line, **kwargs):
         super().__init__(command_line, **kwargs)
         self.args = []
@@ -11,19 +11,20 @@ class PsArguments(TaskArguments):
         pass
 
 
-class PsCommand(CommandBase):
-    cmd = "ps"
+class ExitCommand(CommandBase):
+    cmd = "exit"
     needs_admin = False
-    help_cmd = "ps"
-    description = "Get process listing"
+    help_cmd = "exit"
+    description = "Exit the SSH session"
     version = 1
     author = "Spencer Adolph"
-    argument_class = PsArguments
+    argument_class = ExitArguments
+    is_exit = True
+    supported_ui_features = ["callback_table:exit"]
     attackmapping = []
 
     async def create_go_tasking(self, taskData: MythicCommandBase.PTTaskMessageAllData) -> MythicCommandBase.PTTaskCreateTaskingMessageResponse:
-        command_to_execute = ["ps", "-efH"]
-        output, errors = run_ssh_command(taskData, command_to_execute)
+        output, errors = exit_ssh(taskData)
 
         await SendMythicRPCResponseCreate(MythicRPCResponseCreateMessage(
             TaskID=taskData.Task.ID,
@@ -31,7 +32,7 @@ class PsCommand(CommandBase):
         ))
 
         WasSuccess = False
-        if errors == "":
+        if output == "":
             WasSuccess = True
 
         response = MythicCommandBase.PTTaskCreateTaskingMessageResponse(

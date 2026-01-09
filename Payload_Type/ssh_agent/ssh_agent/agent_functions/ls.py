@@ -1,7 +1,8 @@
 import os
 from mythic_container.MythicCommandBase import *
 from mythic_container.MythicRPC import *
-# from ..agent_code.ssh_helpers import directory_list_via_sshfs
+
+from ..agent_code.ssh_helpers import run_ssh_command
 
 class LsArguments(TaskArguments):
     def __init__(self, command_line, **kwargs):
@@ -41,13 +42,8 @@ class Ls(CommandBase):
         local_dir_path = os.path.join(sshfs_path, taskData.args.get_arg('full_path').lstrip("/"))
         path = Path(local_dir_path)
 
-        # TODO: even more error handling here!
-        # if not path.exists():
-        #     print(f"Error: Directory '{path}' does not exist.")
-        #     return ''
-        # if not path.is_dir():
-        #     print(f"Error: '{path}' is not a directory.")
-        #     return ''
+        # i need to surround command with single quotes so that sh -c treats it as a single command
+        output, errors = run_ssh_command(taskData, ["ls", "-latr", taskData.args.get_arg('full_path')])
         
         files = []
         for file in path.iterdir():
@@ -78,15 +74,15 @@ class Ls(CommandBase):
 
         await SendMythicRPCResponseCreate(MythicRPCResponseCreateMessage(
             TaskID=taskData.Task.ID,
-            Response='test response'.encode('utf-8'),
+            Response=output.encode('utf-8'),
         ))
 
         response = MythicCommandBase.PTTaskCreateTaskingMessageResponse(
             TaskID=taskData.Task.ID,
             Success=True, # TODO: fix error handling from ssh helper function
             Completed=True,
-            Stdout='',
-            Stderr=''
+            Stdout=output,
+            Stderr=errors
         )
         return response
 

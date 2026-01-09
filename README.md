@@ -1,20 +1,31 @@
 # SSH
 
-An ssh agent for Mythic. 
+An ssh agent for Mythic. Great for LOTL.
 
-## Why
-Instead of running malware, just add a key 🤷‍♂️.
+## Overview
 
-## Current How-To
+The Mythic 'payload' is a generated private key. This is tied to a target using username+host+port. Building will output the corresponding public key to enable access. Once added to the target's authorized_keys, generate a (fake) callback to establish the connection and use.
 
-- Payloads are just ssh private keys
-    - These are tied to a username + host + port (actual host:port, not a tunnel)
+> [!TIP]  
+> If connecting through a tunnel, create the callback with 'ExtraInfo' format `host:port`
 
-- Generating a payload will output the public key in the build message
+## Installing
 
-- Manually create a callback to establish the ssh connection
-    - If using a tunnel, you must specify within 'ExtraInfo' the tunnel using format `host:port`
-    - 'reconnect' will connect in this same way
+TODO -> get this working: sudo ./mythic-cli install github https://github.com/spenceradolph/ssh
+
+In the meantime, do this (probably):
+```bash
+git clone https://github.com/spenceradolph/ssh
+cd ssh
+# edit ./Payload_Type/ssh_agent/rabbitmq_config.json to point to mythic install
+python3 -m venv ./.venv
+source ./.venv/bin/activate
+pip install mythic_container pytz
+python3 ./Payload_Type/ssh_agent/main.py
+# see the service show up in Mythic!
+```
+
+Or alternatively, run using the vscode debugger in order to set breakpoints and easily restart the service when making changes.
 
 ### How its implemented
 
@@ -22,39 +33,46 @@ SSH lets us utilize control sockets so that the connection is only established o
 
 ```bash
 # when connecting, setup the socket and background
-ssh -MS /tmp/ssh_{PayloadUUID}.socket -i {key} -p {port} {user}@{host} -fnNT
+ssh -MS /tmp/ssh_{PayloadUUID}.socket -i {key_generated_by_mythic} -p {port} {user}@{host} -fnNT
 
-# running commands (host is only syntactically required, not used)
-ssh -S /tmp/ssh_{PayloadUUID}.socket {host} {command}
+# running commands (host is only syntactically required, not used) through the socket
+ssh -S /tmp/ssh_{PayloadUUID}.socket {host} {command_passed_from_mythic}
 
-# exit
-ssh -S /tmp/ssh_{PayloadUUID}.socket -O exit {host}
+# sshfs is also used for easier file system interactions
+sshfs a:/ /mnt/ssh_{payload_uuid}.sshfs/ -o ssh_command='ssh -S /tmp/ssh_{payload_uuid}.socket'
+# /mnt/ssh_{payload_uuid}.sshfs/
 ```
 
 ## Current Supported Commands
 
 - ps
+    - integrated with process browser
+- ls
+    - integrated with file browser (list)
+    - ex: `ls /etc`
+- download
+    - integrated with file browser (download)
+    - ex: `download /etc/shadow`
+- sh (pass any command to /bin/sh -c)
+    - ex: `sh cat /var/log/syslog | egrep thing`
 - exit
 - reconnect
 
-## TODO
+## Important TODO
 
 - figure out docker container requirments / github build
-- optionally upload private keys as part of build
-- optionally select previously built private keys?
-- more error handling
-- file upload/download over the socket
-- tunnels (and socks proxy)
 
-### Integrations TODO
+### Bonus TODO
 
-- file browser
 - interactive shell
-- socks proxy
+- tunnels / socks proxy integration
+- community bof support
+- file upload via file browser
+- process kill via process browser
+- specify keys when building payload
 
-### Things to request from Cody
+### Things to request from Cody?
 
 - sort process browser by start time (and/or filter by it?)
-- last column in process should stick to right edge?
-- figure out deleted process updates to tree
-- does file browser support metadata about '/'
+- last column in process should stick to right edge (ui preference)
+- figure out deleted process updates to tree (and deleted files update)

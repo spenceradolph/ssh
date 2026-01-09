@@ -47,7 +47,7 @@ class DownloadCommand(CommandBase):
 
         await SendMythicRPCResponseCreate(MythicRPCResponseCreateMessage(
             TaskID=taskData.Task.ID,
-            Response=output,
+            Response='File downloaded successfully.'.encode('utf-8'),
         ))
 
         response = MythicCommandBase.PTTaskCreateTaskingMessageResponse(

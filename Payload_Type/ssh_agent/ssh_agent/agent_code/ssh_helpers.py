@@ -2,7 +2,6 @@ from mythic_container.MythicCommandBase import *
 from mythic_container.MythicRPC import *
 import subprocess
 import os
-from pathlib import Path
 
 
 async def connect_to_ssh(payload_uuid: str, username: str, connect_ip: str, connect_port: str):
@@ -96,6 +95,7 @@ def run_ssh_command(taskData: MythicCommandBase.PTTaskMessageAllData, command_to
         errors = str(e)
 
     return output, errors
+
 
 def download_file_via_sshfs(taskData: MythicCommandBase.PTTaskMessageAllData, remote_path: str) -> bytes:
     payload_uuid = taskData.Payload.UUID

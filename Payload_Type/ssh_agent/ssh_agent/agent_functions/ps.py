@@ -25,6 +25,8 @@ class PsCommand(CommandBase):
     supported_ui_features = ["process_browser:list"]
 
     async def create_go_tasking(self, taskData: MythicCommandBase.PTTaskMessageAllData) -> MythicCommandBase.PTTaskCreateTaskingMessageResponse:
+        # TODO: test looking at proc through sshfs instead
+        # sshfs -o direct_io localhost:/proc /mnt/tmp
         # cmd is at the end because it can contain spaces, so we join everything after the other fields to capture it
         command_to_execute = ["ps", "--no-headers", "-ww", "-eo", "pid,ppid,user,comm,lstart,cmd"]
         output, errors = run_ssh_command(taskData, command_to_execute)

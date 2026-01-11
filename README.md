@@ -60,7 +60,7 @@ sshfs a:/ /mnt/ssh_{payload_uuid}.sshfs/ -o ssh_command='ssh -S /tmp/ssh_{payloa
 - sh (pass any command to /bin/sh -c)
     - ex: `sh cat /var/log/syslog | egrep thing`
 - tunnel_list
-- tunnel_add (only -L and -R)
+- tunnel_add, tunnel_add_proxy
 - tunnel_remove
 - exit
 - reconnect
@@ -72,7 +72,6 @@ sshfs a:/ /mnt/ssh_{payload_uuid}.sshfs/ -o ssh_command='ssh -S /tmp/ssh_{payloa
 ### Bonus TODO
 
 - interactive shell
-- socks proxy integration
 - community bof support
 - file upload via file browser
 - process kill via process browser

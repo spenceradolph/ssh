@@ -5,30 +5,43 @@ import base64
 
 from ..agent_code.ssh_helpers import run_ssh_command
 
-class TunnelRemoveArguments(TaskArguments):
+class TunnelAddProxyArguments(TaskArguments):
     def __init__(self, command_line, **kwargs):
         super().__init__(command_line, **kwargs)
         # direction (forward/reverse), listen_interface, listen_port, target_ip, target_port, description
         self.args = [
             CommandParameter(
-                name="tunnel_id",
-                type=ParameterType.Number,
-                description="ID of the tunnel to remove"
-            )
+                name="proxy_port",
+                type=ParameterType.String,
+                description="proxy_port",
+                default_value="9050",
+                parameter_group_info=[ParameterGroupInfo(
+                    required=False
+                )]
+            ),
+            CommandParameter(
+                name="proxy_interface",
+                type=ParameterType.String,
+                description="proxy_interface",
+                default_value="127.0.0.1",
+                parameter_group_info=[ParameterGroupInfo(
+                    required=False
+                )]
+            ),
         ]
 
     async def parse_arguments(self):
         self.load_args_from_json_string(self.command_line)
 
 
-class TunnelRemove(CommandBase):
-    cmd = "tunnel_remove"
+class TunnelAddProxy(CommandBase):
+    cmd = "tunnel_add_proxy"
     needs_admin = False
-    help_cmd = "tunnel_remove"
-    description = "Remove a tunnel"
+    help_cmd = "tunnel_add_proxy"
+    description = "Add a new proxy tunnel"
     version = 1
     author = "Spencer Adolph"
-    argument_class = TunnelRemoveArguments
+    argument_class = TunnelAddProxyArguments
     attackmapping = []
 
     async def create_go_tasking(self, taskData: MythicCommandBase.PTTaskMessageAllData) -> MythicCommandBase.PTTaskCreateTaskingMessageResponse:
@@ -42,34 +55,30 @@ class TunnelRemove(CommandBase):
 
         # TODO: look to see if tunnel already exists?
 
-        tunnel_id = taskData.args.get_arg('tunnel_id')
+        proxy_port = taskData.args.get_arg('proxy_port')
+        proxy_interface = taskData.args.get_arg('proxy_interface')
 
-        tunnel_to_remove = tunnel_list.pop(tunnel_id)
-
-        command_to_execute = []
-        if tunnel_to_remove['direction'] == 'dynamic':
-            proxy_interface = tunnel_to_remove['proxy_interface']
-            proxy_port = tunnel_to_remove['proxy_port']
-            command_to_execute = ['-O', 'cancel', '-D', f"{proxy_interface}:{proxy_port}"]
-        else:
-            direction = '-L' if tunnel_to_remove['direction'] == 'forward' else '-R'
-            listen_interface = tunnel_to_remove['listen_interface']
-            listen_port = tunnel_to_remove['listen_port']
-            target_ip = tunnel_to_remove['target_ip']
-            target_port = tunnel_to_remove['target_port']
-            command_to_execute = ['-O', 'cancel', direction, f"{listen_interface}:{listen_port}:{target_ip}:{target_port}"]
-
+        command_to_execute = ['-O', 'forward', '-D', f"{proxy_interface}:{proxy_port}"]
         output, errors = run_ssh_command(taskData, command_to_execute)
+
+        tunnel_list.append({
+            "direction": 'dynamic',
+            'proxy_interface': proxy_interface,
+            "proxy_port": proxy_port,
+        })
+
+        thing_to_store = json.dumps(tunnel_list)
 
         await SendMythicRPCAgentStorageRemove(MythicRPCAgentStorageRemoveMessage(
             UniqueID=f'tunnels_{taskData.Payload.UUID}',
         ))
-        await SendMythicRPCAgentStorageCreate(MythicRPCAgentstorageCreateMessage(
+
+        response = await SendMythicRPCAgentStorageCreate(MythicRPCAgentstorageCreateMessage(
             UniqueID=f'tunnels_{taskData.Payload.UUID}',
-            DataToStore=json.dumps(tunnel_list).encode('utf-8'),
+            DataToStore=thing_to_store.encode('utf-8'),
         ))
 
-        output = "Tunnel removed successfully."
+        output = "Tunnel added successfully."
 
         await SendMythicRPCResponseCreate(MythicRPCResponseCreateMessage(
             TaskID=taskData.Task.ID,

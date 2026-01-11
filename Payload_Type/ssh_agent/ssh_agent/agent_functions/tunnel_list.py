@@ -40,6 +40,10 @@ class TunnelList(CommandBase):
         else:
             output = "Active Tunnels:\n"
             for index, tunnel in enumerate(tunnel_list):
+                if tunnel['direction'] == 'dynamic':
+                    output += f"tunnel_id: {index} - {tunnel['direction']} == {tunnel['proxy_interface']}:{tunnel['proxy_port']}\n"
+                    continue
+
                 arrow_direction = ">" if tunnel['direction'] == "forward" else "<"
                 output += f"tunnel_id: {index} - {tunnel['direction']} {arrow_direction} {tunnel['listen_interface']}:{tunnel['listen_port']}:{tunnel['target_ip']}:{tunnel['target_port']} - {tunnel['description']}\n"
             errors = ""

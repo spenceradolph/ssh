@@ -15,12 +15,16 @@ TODO -> get this working: sudo ./mythic-cli install github https://github.com/sp
 
 In the meantime, do this (probably):
 ```bash
+# apt install -y openssh-client sshfs
 git clone https://github.com/spenceradolph/ssh
 cd ssh
+
 # edit ./Payload_Type/ssh_agent/rabbitmq_config.json to point to mythic install
+
 python3 -m venv ./.venv
 source ./.venv/bin/activate
 pip install mythic_container pytz
+
 python3 ./Payload_Type/ssh_agent/main.py
 # see the service show up in Mythic!
 ```

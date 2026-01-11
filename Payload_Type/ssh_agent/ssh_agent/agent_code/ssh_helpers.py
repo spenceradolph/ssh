@@ -2,6 +2,7 @@ from mythic_container.MythicCommandBase import *
 from mythic_container.MythicRPC import *
 import subprocess
 import os
+import json
 
 
 async def connect_to_ssh(payload_uuid: str, username: str, connect_ip: str, connect_port: str):
@@ -40,10 +41,18 @@ async def connect_to_ssh(payload_uuid: str, username: str, connect_ip: str, conn
         output = ""
         errors = str(e)
 
+    empty_tunnel_list = []
+    data_to_store = json.dumps(empty_tunnel_list)
+
+    response = await SendMythicRPCAgentStorageCreate(MythicRPCAgentstorageCreateMessage(
+        UniqueID=f'tunnels_{payload_uuid}',
+        DataToStore=data_to_store.encode('utf-8'),
+    ))
+
     return output, errors
 
 
-def exit_ssh(taskData: MythicCommandBase.PTTaskMessageAllData):
+async def exit_ssh(taskData: MythicCommandBase.PTTaskMessageAllData):
     payload_uuid = taskData.Payload.UUID
     socket_path = ["-S", f"/tmp/ssh_{payload_uuid}.socket"]
 
@@ -68,6 +77,10 @@ def exit_ssh(taskData: MythicCommandBase.PTTaskMessageAllData):
         errors = str(e)
 
     os.rmdir(f"/mnt/ssh_{payload_uuid}.sshfs")
+
+    response = await SendMythicRPCAgentStorageRemove(MythicRPCAgentStorageRemoveMessage(
+        UniqueID=f'tunnels_{payload_uuid}',
+    ))
     
     return output, errors
 

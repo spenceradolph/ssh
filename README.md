@@ -59,6 +59,9 @@ sshfs a:/ /mnt/ssh_{payload_uuid}.sshfs/ -o ssh_command='ssh -S /tmp/ssh_{payloa
     - ex: `download /etc/shadow`
 - sh (pass any command to /bin/sh -c)
     - ex: `sh cat /var/log/syslog | egrep thing`
+- interactive
+    - integrated with interactive tasking ui
+    - spawns /bin/bash on target
 - tunnel_list
 - tunnel_add, tunnel_add_proxy
 - tunnel_remove
@@ -71,7 +74,6 @@ sshfs a:/ /mnt/ssh_{payload_uuid}.sshfs/ -o ssh_command='ssh -S /tmp/ssh_{payloa
 
 ### Bonus TODO
 
-- interactive shell
 - community bof support
 - file upload via file browser
 - process kill via process browser

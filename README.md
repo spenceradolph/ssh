@@ -1,6 +1,6 @@
 # SSH
 
-An ssh agent for Mythic. Great for LOTL.
+An ssh (wrapper) agent for Mythic. Great for LOTL.
 
 ## Overview
 
@@ -73,10 +73,11 @@ sshfs a:/ /mnt/ssh_{payload_uuid}.sshfs/ -o ssh_command='ssh -S /tmp/ssh_{payloa
 
 ### TODO
 
-- community bof support
 - file upload via file browser
 - process kill via process browser
+- look into password support (instead of key based)
 - specify keys when building payload
+- community bof support
 
 ### Things to request from Cody?
 

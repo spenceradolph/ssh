@@ -8,7 +8,14 @@ The Mythic 'payload' is a generated private key. This is tied to a target using 
 
 ## Installing
 
-For local development:
+Standard Install
+```bash
+# Current local tunnel port range defined with MYTHIC_SERVER_DYNAMIC_PORTS (defaults to 7000-7010)
+# Edit Mythic/.env and set MYTHIC_DOCKER_NETWORKING="host" to allow any dynamic port range for tunnels
+sudo ./mythic-cli install github https://github.com/spenceradolph/ssh
+```
+
+For local development
 ```bash
 # apt install -y openssh-client sshfs
 git clone https://github.com/spenceradolph/ssh
@@ -22,17 +29,6 @@ pip install mythic_container pytz
 python3 ./Payload_Type/ssh_agent/main.py
 # see the service show up in Mythic!
 # Or alternatively, run using the vscode debugger in order to set breakpoints and easily restart the service when making changes.
-```
-
-Standard Install: NOT CURRENTLY WORKING
-
-- This is currently in the works, as sshfs within a docker container requires extra permissions / capes that mythic doesn't grant by default.
-```bash
-# Current local tunnel port range defined with MYTHIC_SERVER_DYNAMIC_PORTS (defaults to 7000-7010)
-# Edit Mythic/.env and set MYTHIC_DOCKER_NETWORKING="host" to allow any dynamic port range for tunnels
-
-# install
-# sudo ./mythic-cli install github https://github.com/spenceradolph/ssh
 ```
 
 ### How its implemented

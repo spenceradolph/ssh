@@ -3,5 +3,14 @@
     "exclude_c2_profiles": true,
     "exclude_documentation_payload": true,
     "exclude_documentation_c2": true,
-    "exclude_agent_icons": true
+    "exclude_agent_icons": true,
+    "docker-compose": {
+        "privileged": true,
+        "cap_add": [
+            "SYS_ADMIN"
+        ],
+        "devices": [
+            "/dev/fuse:/dev/fuse"
+        ]
+    }
 }

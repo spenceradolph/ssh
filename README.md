@@ -8,6 +8,9 @@ The Mythic 'payload' is a generated private key. This is tied to a target using 
 
 ## Installing
 
+> [!WARNING]  
+> Most of the current functionality was rapidly built (ie: without error checks), and definately contains numerous bugs. Not yet production ready.
+
 Standard Install
 ```bash
 # Current local tunnel port range defined with MYTHIC_SERVER_DYNAMIC_PORTS (defaults to 7000-7010)

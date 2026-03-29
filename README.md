@@ -67,6 +67,11 @@ sshfs a:/ /mnt/ssh_{payload_uuid}.sshfs/ -o ssh_command='ssh -S /tmp/ssh_{payloa
 - tunnel_remove
 - exit
 - reconnect
+- upload
+- cat
+- netstat
+- w
+- id
 
 > [!TIP]  
 > If connecting through a tunnel, create the callback with 'ExtraInfo' format `host:port`

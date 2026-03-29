@@ -2,7 +2,7 @@ from mythic_container.MythicCommandBase import *
 from mythic_container.MythicRPC import *
 from ..agent_code.ssh_helpers import download_file_via_sshfs
 
-class DownloadArguments(TaskArguments):
+class CatArguments(TaskArguments):
     def __init__(self, command_line, **kwargs):
         super().__init__(command_line, **kwargs)
         self.args = [
@@ -17,14 +17,14 @@ class DownloadArguments(TaskArguments):
         self.load_args_from_json_string(self.command_line)
 
 
-class DownloadCommand(CommandBase):
-    cmd = "download"
+class CatCommand(CommandBase):
+    cmd = "cat"
     needs_admin = False
-    help_cmd = "download"
-    description = "Download a file"
+    help_cmd = "cat"
+    description = "cat a file"
     version = 1
     author = "Spencer Adolph"
-    argument_class = DownloadArguments
+    argument_class = CatArguments
     attackmapping = []
     supported_ui_features = ["file_browser:download"]
 
@@ -47,14 +47,14 @@ class DownloadCommand(CommandBase):
 
         await SendMythicRPCResponseCreate(MythicRPCResponseCreateMessage(
             TaskID=taskData.Task.ID,
-            Response='File downloaded successfully.'.encode('utf-8'),
+            Response=output,
         ))
 
         response = MythicCommandBase.PTTaskCreateTaskingMessageResponse(
             TaskID=taskData.Task.ID,
             Success=True, # TODO: fix error handling from ssh helper function
             Completed=True,
-            Stdout='',
+            Stdout=output.decode('utf-8'),
             Stderr=''
         )
         return response

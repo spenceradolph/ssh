@@ -3,6 +3,7 @@ from mythic_container.MythicRPC import *
 import subprocess
 import os
 import json
+import shutil
 
 
 async def connect_to_ssh(payload_uuid: str, username: str, connect_ip: str, connect_port: str):
@@ -125,6 +126,17 @@ def download_file_via_sshfs(taskData: MythicCommandBase.PTTaskMessageAllData, re
     except Exception as e:
         return b""
     
+def upload_file_via_sshfs(taskData: MythicCommandBase.PTTaskMessageAllData, local_path: str, remote_path: str) -> bytes:
+    payload_uuid = taskData.Payload.UUID
+    sshfs_path = f"/mnt/ssh_{payload_uuid}.sshfs"
+
+    remote_file_path = os.path.join(sshfs_path, remote_path.lstrip("/"))
+
+    # TODO: standardize error handling (example, doesn't currently handle if file doesn't exist....etc)
+
+    shutil.copy2(local_path, remote_file_path)
+
+    return 'uploaded'.encode('utf-8')
 
 # def directory_list_via_sshfs(taskData: MythicCommandBase.PTTaskMessageAllData, remote_path: str) -> str:
 #     payload_uuid = taskData.Payload.UUID

@@ -1,8 +1,8 @@
 from mythic_container.MythicCommandBase import *
 from mythic_container.MythicRPC import *
-from ..agent_code.ssh_helpers import exit_ssh
+from ..agent_code.ssh_helpers import run_ssh_command
 
-class ExitArguments(TaskArguments):
+class WArguments(TaskArguments):
     def __init__(self, command_line, **kwargs):
         super().__init__(command_line, **kwargs)
         self.args = []
@@ -11,36 +11,34 @@ class ExitArguments(TaskArguments):
         pass
 
 
-class ExitCommand(CommandBase):
-    cmd = "exit"
+class WCommand(CommandBase):
+    cmd = "w"
     needs_admin = False
-    help_cmd = "exit"
-    description = "Exit the SSH session"
+    help_cmd = "w"
+    description = "Run w command"
     version = 1
     author = "Spencer Adolph"
-    argument_class = ExitArguments
-    is_exit = True
-    supported_ui_features = ["callback_table:exit"]
+    argument_class = WArguments
     attackmapping = []
+    supported_ui_features = []
 
     async def create_go_tasking(self, taskData: MythicCommandBase.PTTaskMessageAllData) -> MythicCommandBase.PTTaskCreateTaskingMessageResponse:
-        output, errors = await exit_ssh(taskData)
+        command_to_execute = ["w"]
+        output, errors = run_ssh_command(taskData, command_to_execute)
+
+        # TODO: error handling
 
         await SendMythicRPCResponseCreate(MythicRPCResponseCreateMessage(
             TaskID=taskData.Task.ID,
-            Response=(output or "").encode("UTF8"),
+            Response=output,
         ))
-
-        WasSuccess = False
-        if output == "":
-            WasSuccess = True
 
         response = MythicCommandBase.PTTaskCreateTaskingMessageResponse(
             TaskID=taskData.Task.ID,
-            Success=WasSuccess,
-            Completed=WasSuccess,
+            Success=True, # TODO: fix error handling from ssh helper function
+            Completed=True,
             Stdout=output,
-            Stderr=errors
+            Stderr=''
         )
         return response
 

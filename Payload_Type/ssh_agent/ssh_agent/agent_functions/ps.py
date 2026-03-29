@@ -41,6 +41,8 @@ class PsCommand(CommandBase):
             lstart = " ".join(process_info[4:9])
             cmd = " ".join(process_info[9:])
 
+            # TODO: there is a bug that assumes a single word for comm, but it has been seen to have 'ssh <defunct>' as an addition to it
+            # This breaks the parsing, so we may need another additional check or to change the lstart format into something that is expected
             start_time = datetime.strptime(lstart, "%a %b %d %H:%M:%S %Y").replace(tzinfo=pytz.utc)
             epoch_time = int(start_time.timestamp())
 

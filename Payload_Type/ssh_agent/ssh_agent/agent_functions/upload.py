@@ -1,54 +1,56 @@
 from mythic_container.MythicCommandBase import *
 from mythic_container.MythicRPC import *
+from ..agent_code.ssh_helpers import upload_file_via_sshfs
 
-from ..agent_code.ssh_helpers import run_ssh_command
-
-class ShArguments(TaskArguments):
+class UploadArguments(TaskArguments):
     def __init__(self, command_line, **kwargs):
         super().__init__(command_line, **kwargs)
         self.args = [
             CommandParameter(
-                name="command",
-                type=ParameterType.String,
-                description="Command to run"
-            )
+                name="local_path",
+                description="local path to file",
+                type=ParameterType.String
+            ),
+            CommandParameter(
+                name="remote_path",
+                description="remote path to file",
+                type=ParameterType.String
+            ),
         ]
 
     async def parse_arguments(self):
         self.load_args_from_json_string(self.command_line)
 
 
-class Sh(CommandBase):
-    cmd = "sh"
+class UploadCommand(CommandBase):
+    cmd = "upload"
     needs_admin = False
-    help_cmd = "sh"
-    description = "Execute a shell command"
+    help_cmd = "upload"
+    description = "Upload a file"
     version = 1
     author = "Spencer Adolph"
-    argument_class = ShArguments
+    argument_class = UploadArguments
     attackmapping = []
+    supported_ui_features = []
 
     async def create_go_tasking(self, taskData: MythicCommandBase.PTTaskMessageAllData) -> MythicCommandBase.PTTaskCreateTaskingMessageResponse:
-        command = taskData.args.get_arg('command')
-        quoted_command = f"'{command}'"
-        # i need to surround command with single quotes so that sh -c treats it as a single command
-        command_to_execute = ['/bin/sh', '-c'] + quoted_command.split(" ")
-        output, errors = run_ssh_command(taskData, command_to_execute)
+        output = upload_file_via_sshfs(taskData, taskData.args.get_arg('local_path'), taskData.args.get_arg('remote_path'))
+
+        # TODO: error handling
 
         await SendMythicRPCResponseCreate(MythicRPCResponseCreateMessage(
             TaskID=taskData.Task.ID,
-            Response=output.encode('utf-8'),
+            Response='File uploaded successfully.'.encode('utf-8'),
         ))
 
         response = MythicCommandBase.PTTaskCreateTaskingMessageResponse(
             TaskID=taskData.Task.ID,
-            Success=True,
+            Success=True, # TODO: fix error handling from ssh helper function
             Completed=True,
-            Stdout=output,
-            Stderr=errors
+            Stdout='',
+            Stderr=''
         )
         return response
-
 
     async def process_response(self, task: PTTaskMessageAllData, response: any) -> PTTaskProcessResponseMessageResponse:
         resp = PTTaskProcessResponseMessageResponse(TaskID=task.Task.ID, Success=True)
